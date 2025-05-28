@@ -1,103 +1,97 @@
-import Image from "next/image";
+"use client";
+
+import { Button } from "@/components/ui/button";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { languages } from "@/lib/languages";
+import type { Languages } from "@/lib/types";
+import { ChevronDown, Globe } from "lucide-react";
+import { useState } from "react";
+import GenerateQuote from "./components/generate-quote";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+	const [selectedLanguage, setSelectedLanguage] =
+		useState<Languages>("English");
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+	const translation = languages[selectedLanguage];
+
+	const languageDisplayNames: { [key in Languages]: string } = {
+		English: "English",
+		Português: "Português",
+		Español: "Español",
+		Kreyòl_Ayisyen: "Kreyòl Ayisyen",
+	};
+
+	return (
+		<main className="py-20 flex flex-col items-center space-y-12 bg-gradient-to-b from-slate-50 to-blue-50 min-h-screen">
+			<h1 className="text-5xl tracking-tight font-semibold text-center text-slate-700">
+				{translation.mainTitle}
+			</h1>
+			<DropdownMenu>
+				<DropdownMenuTrigger asChild>
+					{
+						<Button className="bg-gradient-to-br from-slate-700 to-slate-500 ring-1 hover:brightness-95 ring-slate-200 shadow-sm flex items-center gap-2 px-3 py-2 rounded-[8px] text-white text-sm">
+							<Globe className="size-4" />{" "}
+							{languageDisplayNames[selectedLanguage] || "Selecione o idioma"}{" "}
+							<ChevronDown className="size-4 -ml-1" />
+						</Button>
+					}
+				</DropdownMenuTrigger>
+				<DropdownMenuContent className="w-[200px] mt-1 ring-1 ring-slate-200 bg-slate-100 border-none rounded-[8px]">
+					<DropdownMenuItem
+						onClick={() => setSelectedLanguage("English")}
+						className="hover:text-slate-900 text-slate-500"
+					>
+						English
+					</DropdownMenuItem>
+					<DropdownMenuSeparator className="bg-slate-300 mx-2" />
+					<DropdownMenuItem
+						onClick={() => setSelectedLanguage("Português")}
+						className="hover:text-slate-900 text-slate-500"
+					>
+						Português
+					</DropdownMenuItem>
+					<DropdownMenuSeparator className="bg-slate-300 mx-2" />
+					<DropdownMenuItem
+						onClick={() => setSelectedLanguage("Español")}
+						className="hover:text-slate-900 text-slate-500"
+					>
+						Español
+					</DropdownMenuItem>
+					<DropdownMenuSeparator className="bg-slate-300 mx-2" />
+					<DropdownMenuItem
+						onClick={() => setSelectedLanguage("Kreyòl_Ayisyen")}
+						className="hover:text-slate-900 text-slate-500"
+					>
+						Kreyòl Ayisyen
+					</DropdownMenuItem>
+				</DropdownMenuContent>
+			</DropdownMenu>
+
+			<Tabs defaultValue="generator" className="">
+				<TabsList className="h-full w-[800px]">
+					<TabsTrigger className="rounded-[8px]" value="generator">
+						{translation.generateQuoteBtn}
+					</TabsTrigger>
+					<TabsTrigger className="rounded-[8px]" value="saved">
+						{translation.savedQuotesTitle}
+					</TabsTrigger>
+				</TabsList>
+
+				<TabsContent value="generator">
+					<GenerateQuote selectedLanguage={selectedLanguage} />
+				</TabsContent>
+
+				<TabsContent value="saved">
+					{/* Conteúdo da aba "Cotações Salvas" */}
+				</TabsContent>
+			</Tabs>
+		</main>
+	);
 }

@@ -1,0 +1,1 @@
+export type Languages = "English" | "Português" | "Español" | "Kreyòl_Ayisyen" 
