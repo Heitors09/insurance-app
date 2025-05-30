@@ -20,6 +20,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Keyboard, Plus, Shield, ShieldCheck, X } from "lucide-react";
 import { useState } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
+import { toast } from "sonner";
 import {
 	type QuoteFormSchema,
 	quoteFormSchema,
@@ -55,9 +56,7 @@ export default function GenerateQuote({
 		},
 	});
 
-	const [showVehicleByIndex, setShowVehicleByIndex] = useState<number | null>(
-		null,
-	);
+	const [showVehicleByIndex, setShowVehicleByIndex] = useState<number>(0);
 
 	console.log(showVehicleByIndex);
 
@@ -65,6 +64,18 @@ export default function GenerateQuote({
 		control,
 		name: "vehicles",
 	});
+
+	const handleRemoveVehicle = (indexToRemove: number) => {
+		const vehicleIndexInArray = indexToRemove + 1;
+
+		if (showVehicleByIndex === vehicleIndexInArray) {
+			setShowVehicleByIndex(0);
+		} else if (showVehicleByIndex > vehicleIndexInArray) {
+			setShowVehicleByIndex(showVehicleByIndex - 1);
+		}
+
+		remove(vehicleIndexInArray);
+	};
 
 	const translation = languages[selectedLanguage];
 	const agentNames = [
@@ -77,7 +88,6 @@ export default function GenerateQuote({
 	const [quoteData, setQuoteData] = useState(null);
 
 	const draftVehicle = watch("vehicles.0");
-	console.log(draftVehicle);
 	const currentCoverageOpt = watch("vehicles.0.coverageOpt");
 	const deductibleOptedIn = useWatch({
 		control,
@@ -102,11 +112,7 @@ export default function GenerateQuote({
 	const feeOptedIn = watch("fee.optedIn");
 	const fullPaymentOptedIn = watch("paymentAmounts.fullPayment.optedIn");
 	const addedFields = fields.slice(1);
-	const currentVehicle = watch(
-		showVehicleByIndex !== null
-			? `vehicles.${showVehicleByIndex}`
-			: "vehicles.0",
-	);
+	const currentVehicle = watch(`vehicles.${showVehicleByIndex}`);
 
 	//functions
 
@@ -115,23 +121,31 @@ export default function GenerateQuote({
 
 		if (!draft.name) return;
 
-		vehicleSchema.parse(draft);
+		try {
+			vehicleSchema.parse(draft);
 
-		append({
-			...draft,
-		});
+			append({
+				...draft,
+			});
 
-		setValue("vehicles.0", {
-			name: "",
-			coverageOpt: null,
-			deductible: { optedIn: false, value: 0 },
-			bodilyInjury: { optedIn: false, value: "" },
-			medicalPayments: { optedIn: false, value: "" },
-			propertyDamage: { optedIn: false, value: "" },
-			rentalCarCoverage: false,
-			gapInsurance: false,
-			extraCoverage: false,
-		});
+			setValue("vehicles.0", {
+				name: "",
+				coverageOpt: null,
+				deductible: { optedIn: false, value: 0 },
+				bodilyInjury: { optedIn: false, value: "" },
+				medicalPayments: { optedIn: false, value: "" },
+				propertyDamage: { optedIn: false, value: "" },
+				rentalCarCoverage: false,
+				gapInsurance: false,
+				extraCoverage: false,
+			});
+
+			toast.success("Veículo adicionado com sucesso!");
+		} catch (error) {
+			toast.error(
+				"Campos obrigatórios faltando. Verifique os dados e tente novamente.",
+			);
+		}
 	};
 
 	const handleSetCoverageType = (
@@ -166,6 +180,9 @@ export default function GenerateQuote({
 	const onError = (errors: any) => {
 		console.error("Erros de validação:", errors);
 	};
+
+	console.log("meu added fields:", addedFields);
+	console.log("meu veículo de draft:", draftVehicle);
 
 	return (
 		<Card className="border-none bg-white text-slate-900 ring-1 ring-slate-200 px-8 flex flex-col items-center text-slate-900 rounded-[8px]">
@@ -381,7 +398,11 @@ export default function GenerateQuote({
 						<Badge
 							onClick={() => setShowVehicleByIndex(0)}
 							key={draftVehicle.name}
-							className="bg-slate-700 text-white rounded-[8px] px-3 py-2 mb-5 flex items-center gap-2"
+							className={
+								showVehicleByIndex === 0
+									? "bg-slate-700 text-white hover:cursor-pointer rounded-[8px] px-3 scale-105 py-2 mb-5 flex items-center gap-2 transition-transform duration-300"
+									: "bg-slate-500/70 text-white hover:cursor-pointer rounded-[8px] px-3 py-2 mb-5 flex items-center gap-2 transition-transform duration-300"
+							}
 						>
 							{draftVehicle.name}
 						</Badge>
@@ -392,7 +413,7 @@ export default function GenerateQuote({
 							className="bg-slate-700 text-white rounded-[8px] px-3 py-2 mb-5 flex items-center gap-2"
 						>
 							<Keyboard className="size-6" />
-							Type to add vehicle
+							{translation.typeToAddAvehicle}
 						</Badge>
 					)}
 					{addedFields.map((field, index) => {
@@ -400,10 +421,21 @@ export default function GenerateQuote({
 							<Badge
 								onClick={() => setShowVehicleByIndex(index + 1)}
 								key={field.id}
-								className="bg-slate-700 text-white rounded-[8px] px-3 py-2 mb-5 flex items-center gap-2"
+								className={
+									showVehicleByIndex === index + 1
+										? "bg-slate-700 text-white hover:cursor-pointer  rounded-[8px] px-3 scale-105 py-2 mb-5 flex items-center gap-2 transition-transform duration-300"
+										: "bg-slate-500/70 text-white hover:cursor-pointer rounded-[8px] px-3 py-2 mb-5 flex items-center gap-2 transition-transform duration-300"
+								}
 							>
 								{field.name}
-								<button type="button" onClick={() => remove(index)}>
+								<button
+									type="button"
+									className="hover:cursor-pointer"
+									onClick={(e) => {
+										e.stopPropagation();
+										handleRemoveVehicle(index);
+									}}
+								>
 									<X size={12} />
 								</button>
 							</Badge>
@@ -415,6 +447,7 @@ export default function GenerateQuote({
 						{translation.vehicleName}
 					</Label>
 					<Input
+						onInput={() => setShowVehicleByIndex(0)}
 						{...register("vehicles.0.name")}
 						className="ring-1 ring-slate-300 rounded-[8px] border-none"
 					/>
@@ -481,7 +514,6 @@ export default function GenerateQuote({
 							{errors.vehicles[0].coverageOpt.message}
 						</p>
 					)}
-					{/* daqui */}
 					<div className="space-y-4">
 						{/* Deductible */}
 						<div className="w-full flex items-center justify-between">
@@ -717,7 +749,7 @@ export default function GenerateQuote({
 						{/* Extra Coverage */}
 						<div className="w-full flex items-center justify-between">
 							<Label className="flex items-center" htmlFor="extraCoverage">
-								Extra Coverage
+								{translation.extraCoverage}
 							</Label>
 							<Controller
 								key={`ExtraCoverage-${showVehicleByIndex}`}
@@ -732,7 +764,6 @@ export default function GenerateQuote({
 							/>
 						</div>
 
-						{/* até aqui */}
 						<Separator className="bg-slate-300" />
 						<div className="w-full flex items-center justify-between">
 							<Label className="flex items-center" htmlFor="name">
