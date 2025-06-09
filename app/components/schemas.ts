@@ -48,6 +48,7 @@ const rentersInsuranceSchema = z
 			}
 		}
 	});
+
 // ✅ Deductible schema
 const deductibleSchema = z
 	.object({
@@ -112,18 +113,28 @@ const propertyDamageSchema = z
 		}
 	});
 
-export const vehicleSchema = z
-	.object({
+// ✅ Schema base para veículos (sem validações obrigatórias)
+const baseVehicleSchema = z.object({
+	name: z.string().optional(),
+	coverageOpt: z
+		.enum(["Full Coverage", "Liability Only"])
+		.nullable()
+		.optional(),
+	deductible: deductibleSchema,
+	bodilyInjury: bodilyInjurySchema,
+	medicalPayments: medicalPaymentsSchema,
+	propertyDamage: propertyDamageSchema,
+	rentalCarCoverage: z.boolean().optional(),
+	extraCoverage: z.boolean().optional(),
+	gapInsurance: z.boolean().optional(),
+});
+
+// ✅ Schema para veículo principal (com validações obrigatórias)
+export const vehicleSchema = baseVehicleSchema
+	.extend({
 		name: z.string().min(1, "Vehicle name is required"),
 		coverageOpt: z.enum(["Full Coverage", "Liability Only"]).nullable(),
-
-		deductible: deductibleSchema,
-		bodilyInjury: bodilyInjurySchema,
-		medicalPayments: medicalPaymentsSchema,
-		propertyDamage: propertyDamageSchema,
-
 		rentalCarCoverage: z.boolean(),
-		extraCoverage: z.boolean().optional(),
 		gapInsurance: z.boolean(),
 	})
 	.refine(
@@ -142,6 +153,36 @@ export const vehicleSchema = z
 			path: ["coverageOpt"],
 		},
 	);
+
+// ✅ Schema para opção alternativa (totalmente opcional)
+export const alternativeVehicleSchema = baseVehicleSchema.extend({
+	rentersInsurance: rentersInsuranceSchema.optional(),
+	fee: feeSchema.optional(),
+	paymentAmounts: z
+		.object({
+			firstPayment: z.number().int(),
+			monthlyPayment: z.number().int(),
+		})
+		.optional(),
+	fullPayment: z
+		.object({
+			optedIn: z.boolean().optional(),
+			paymentAmount: z.number().int().optional(),
+		})
+		.refine(
+			(data) => {
+				if (data.optedIn) {
+					return data.paymentAmount !== undefined;
+				}
+				return true;
+			},
+			{
+				message: "paymentAmount é obrigatório quando optedIn é true",
+				path: ["paymentAmount"],
+			},
+		)
+		.optional(),
+});
 
 const paymentAmounts = z.object({
 	firstPayment: z.number().int(),
@@ -173,7 +214,7 @@ const paymentSchema = z.object({
 	fullPayment,
 });
 
-// Main Form Schema
+// ✅ Main Form Schema
 export const quoteFormSchema = z.object({
 	InsuranceType: z
 		.string({
@@ -203,7 +244,8 @@ export const quoteFormSchema = z.object({
 		required_error: "You must select a policy term",
 	}),
 	quoteNumber: z.string().optional(),
-	vehicles: z.array(vehicleSchema).min(1, "At least one vehicle is required"), // At least one vehicle
+	vehicles: z.array(vehicleSchema).min(1, "At least one vehicle is required"),
+	alternativeOption: z.array(alternativeVehicleSchema).optional(),
 	rentersInsurance: rentersInsuranceSchema.optional(),
 	fee: feeSchema.optional(),
 	paymentAmounts: paymentSchema,
