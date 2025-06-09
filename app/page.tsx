@@ -14,6 +14,7 @@ import type { Languages } from "@/lib/types";
 import { ChevronDown, Globe } from "lucide-react";
 import { useState } from "react";
 import GenerateQuote from "./components/generate-quote";
+import SavedQuotes from "./components/saved-quotes";
 
 export default function Home() {
 	const [selectedLanguage, setSelectedLanguage] =
@@ -74,7 +75,7 @@ export default function Home() {
 				</DropdownMenuContent>
 			</DropdownMenu>
 
-			<Tabs defaultValue="generator" className="">
+			<Tabs defaultValue="generator" className="flex items-center">
 				<TabsList className="h-full w-[800px]">
 					<TabsTrigger className="rounded-[8px]" value="generator">
 						{translation.generateQuoteBtn}
@@ -89,7 +90,7 @@ export default function Home() {
 				</TabsContent>
 
 				<TabsContent value="saved">
-					{/* Conteúdo da aba "Cotações Salvas" */}
+					<SavedQuotes />
 				</TabsContent>
 			</Tabs>
 		</main>

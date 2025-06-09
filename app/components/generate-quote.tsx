@@ -320,7 +320,7 @@ export default function GenerateQuote({
 	}
 
 	return (
-		<Card className="border-none bg-white text-slate-900 ring-1 ring-slate-200 px-8 flex flex-col items-center text-slate-900 rounded-[8px]">
+		<Card className="border-none bg-white w-[800px] text-slate-900 ring-1 ring-slate-200 px-8 flex flex-col items-center text-slate-900 rounded-[8px]">
 			<CardTitle className="text-xl">{translation.autoInsurance}</CardTitle>
 			<form
 				onSubmit={handleSubmit(onSubmit, onError)}
@@ -590,18 +590,19 @@ export default function GenerateQuote({
 				<div>
 					{/* aqui */}
 					<div className="flex flex-wrap max-w-[700px] my-5 gap-x-4 gap-y-4">
-						{alternativeDraftField.name.length > 0 && (
-							<Badge
-								onClick={() => setShowAlternativeByIndex(0)}
-								className={
-									showAlternativeByIndex === 0
-										? "bg-blue-700 text-white hover:cursor-pointer rounded-[8px] px-3 scale-105 py-2  flex items-center gap-2 transition-transform duration-300"
-										: "bg-blue-500/70 text-white hover:cursor-pointer rounded-[8px] px-3 py-2  flex items-center gap-2 transition-transform duration-300"
-								}
-							>
-								{translation.alternativeOption} : {alternativeDraftField.name}
-							</Badge>
-						)}
+						{typeof alternativeDraftField?.name === "string" &&
+							alternativeDraftField.name.length > 0 && (
+								<Badge
+									onClick={() => setShowAlternativeByIndex(0)}
+									className={
+										showAlternativeByIndex === 0
+											? "bg-blue-700 text-white hover:cursor-pointer rounded-[8px] px-3 scale-105 py-2  flex items-center gap-2 transition-transform duration-300"
+											: "bg-blue-500/70 text-white hover:cursor-pointer rounded-[8px] px-3 py-2  flex items-center gap-2 transition-transform duration-300"
+									}
+								>
+									{translation.alternativeOption} : {alternativeDraftField.name}
+								</Badge>
+							)}
 						{alternativeAddedFields.map((alternative, index) => {
 							return (
 								<Badge

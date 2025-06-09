@@ -1,4 +1,5 @@
 import DownloadButton from "@/components/download-button";
+import SaveQuoteButton from "@/components/save-button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { languages } from "@/lib/languages";
 import type { Languages } from "@/lib/types";
@@ -68,7 +69,7 @@ export default function Quote({
 		vehicle: any;
 		isAlternative?: boolean;
 	}) => (
-		<Card className="mb-5 border-none rounded-[8px] shadow-sm hover:shadow-md transition-shadow duration-200">
+		<Card className="mb-5 border-none w-[800px] rounded-[8px] shadow-sm hover:shadow-md transition-shadow duration-200">
 			<CardHeader className="pb-3 bg-slate-50 rounded-t-[8px] border-b border-slate-100">
 				<div className="flex items-center justify-between">
 					<div className="flex items-center gap-2">
@@ -290,9 +291,10 @@ export default function Quote({
 					)}
 
 					{/* Alternative Options */}
-					{data.alternativeOption &&
+					{Array.isArray(data.alternativeOption) &&
 						data.alternativeOption.length > 0 &&
-						data.alternativeOption[0]?.name?.length > 0 && (
+						typeof data.alternativeOption[0]?.name === "string" &&
+						data.alternativeOption[0]?.name.length > 0 && (
 							<div className="mb-10">
 								<h2 className="text-xl font-bold text-slate-800 mb-5 flex items-center">
 									<span className="bg-slate-700 text-white w-7 h-7 inline-flex items-center justify-center rounded-full mr-2 text-sm">
@@ -301,7 +303,6 @@ export default function Quote({
 									{translation.alternativeOptions}
 								</h2>
 								{data.alternativeOption.map((vehicle, index) => (
-									// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
 									<VehicleCard
 										// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
 										key={index}
@@ -321,20 +322,20 @@ export default function Quote({
 								</span>
 								Additional Coverage & Fees
 							</h2>
-							<Card className="border-none rounded-lg shadow-sm">
+							<Card className="border-none rounded-[8px] shadow-sm">
 								<CardContent className="p-5">
 									<div className="space-y-4">
 										{data.rentersInsurance?.optedIn && (
-											<div className="flex justify-between items-center bg-slate-50 p-4 rounded-lg">
+											<div className="flex justify-between items-center bg-slate-50 p-4 rounded-[8px]">
 												<div className="flex items-center gap-3">
-													<div className="bg-blue-100 p-2 rounded-md">
+													<div className="bg-blue-100 p-2 rounded-[8px]">
 														<CheckIcon className="h-4 w-4 text-blue-600" />
 													</div>
 													<span className="text-slate-700 font-medium">
 														{translation.rentersInsurance}
 													</span>
 												</div>
-												<span className="text-slate-900 font-bold bg-white px-3 py-1.5 rounded-md border border-slate-200 shadow-sm">
+												<span className="text-slate-900 font-bold bg-white px-3 py-1.5 rounded-[8px] border border-slate-200 shadow-sm">
 													${data.rentersInsurance.firstPayment ?? 0}{" "}
 													{translation.firstPayment}, $
 													{data.rentersInsurance.monthlyPayment ?? 0}{" "}
@@ -343,16 +344,16 @@ export default function Quote({
 											</div>
 										)}
 										{data.fee?.optedIn && data.fee?.value && (
-											<div className="flex justify-between items-center bg-slate-50 p-4 rounded-lg">
+											<div className="flex justify-between items-center bg-slate-50 p-4 rounded-[8px]">
 												<div className="flex items-center gap-3">
-													<div className="bg-amber-100 p-2 rounded-md">
+													<div className="bg-amber-100 p-2 rounded-[8px]">
 														<CheckIcon className="h-4 w-4 text-amber-600" />
 													</div>
 													<span className="text-slate-700 font-medium">
 														{translation.addFee}
 													</span>
 												</div>
-												<span className="text-slate-900 font-bold bg-white px-3 py-1.5 rounded-md border border-slate-200 shadow-sm">
+												<span className="text-slate-900 font-bold bg-white px-3 py-1.5 rounded-[8px] border border-slate-200 shadow-sm">
 													${data.fee.value}
 												</span>
 											</div>
@@ -450,6 +451,7 @@ export default function Quote({
 				elementId="insurance-quote"
 				quoteNumber={data.quoteNumber}
 			/>
+			<SaveQuoteButton data={data} quoteNumber={data.quoteNumber} />
 		</div>
 	);
 }
