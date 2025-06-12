@@ -1,29 +1,24 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
+import { Inter } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "@/components/ui/sonner"
-
-
+import { LanguageProvider } from "./language-context";
 
 const inter = Inter({
-  subsets: ["latin"],
-  weight: ["500","600","700","800"]
-})
-
+	subsets: ["latin"],
+	weight: ["500", "600", "700", "800"],
+});
 
 export default function RootLayout({
-  children,
+	children,
 }: Readonly<{
-  children: React.ReactNode;
+	children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en">
-      <body
-        className={`${inter.className} antialiased`}
-      >
-        {children}
-        <Toaster />
-      </body>
-    </html>
-  );
+	return (
+		<html lang="en">
+			<body className={`${inter.className} antialiased`}>
+				<LanguageProvider>{children}</LanguageProvider>
+				<Toaster />
+			</body>
+		</html>
+	);
 }

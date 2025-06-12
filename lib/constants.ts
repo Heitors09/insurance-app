@@ -9,7 +9,7 @@ export const carriers = [
 	"Hannover",
 	"The Hartford",
 	"Pilgrim",
-];
+] as const;
 
 export const csrNames = [
 	"Lukas Fraga",
@@ -22,6 +22,26 @@ export const csrNames = [
 	"Dalynx",
 	"Guilherme Souza",
 	"Alexandre Dias",
+];
+
+export const bodilyInjuryConstant = [
+	"$35,000 / $80,000",
+	"$50,000 / $100,000",
+	"$100,000 / $300,000",
+];
+
+export const medicalPaymentsConstant = [
+	"$5,000",
+	"$10,000",
+	"$15,000",
+	"$25,000",
+];
+
+export const propertyDamageConstant = [
+	"$50,000",
+	"$100,000",
+	"$150,000",
+	"$250,000",
 ];
 
 export const defaultAlternativeOption = [

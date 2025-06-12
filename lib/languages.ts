@@ -311,3 +311,10 @@ export const languages = {
 		savedQuotesTitle: "Estimasyon Sove",
 	},
 };
+
+export const agentNames = [
+	"Joao da Silva",
+	"Gustavo Fraga",
+	"Jhonathan Oliveira",
+	"Maria Vieira",
+];
