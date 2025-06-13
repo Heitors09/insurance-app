@@ -123,7 +123,7 @@ const SaveQuoteButton = ({
 	};
 
 	return (
-		<div className="flex flex-col gap-3 w-full  mx-auto mt-4">
+		<div className="flex flex-col gap-3 w-full  mx-auto ">
 			{/* Input para nome personalizado (se não houver quoteNumber) */}
 			{showNameInput && !quoteNumber && (
 				<div className="flex  gap-2">

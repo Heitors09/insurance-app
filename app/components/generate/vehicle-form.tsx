@@ -521,8 +521,12 @@ export const VehicleForm = () => {
 				</>
 			) : (
 				<div className="flex flex-col items-center justify-center h-full">
-					<h3 className="text-sm text-slate-500">No vehicles added</h3>
-					<p className="text-sm text-slate-500">Add a vehicle to get started</p>
+					<h3 className="text-sm text-slate-500">
+						{translation?.translations.addVehicle}
+					</h3>
+					<p className="text-sm text-slate-500">
+						{translation?.translations.enterVehicleName}
+					</p>
 				</div>
 			)}
 		</>

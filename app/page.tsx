@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronDown, Globe } from "lucide-react";
 import { useContext } from "react";
 import GenerateQuote from "./components/generate/generate-quote";
+import SavedQuotesList from "./components/generate/saved-quotes-list";
 import { LanguageContext } from "./language-context";
 
 export default function Home() {
@@ -77,7 +78,9 @@ export default function Home() {
 					<GenerateQuote />
 				</TabsContent>
 
-				<TabsContent value="saved">exemplo</TabsContent>
+				<TabsContent value="saved">
+					<SavedQuotesList />
+				</TabsContent>
 			</Tabs>
 		</main>
 	);
