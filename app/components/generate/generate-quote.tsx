@@ -17,6 +17,8 @@ export default function GenerateQuote() {
 		resolver: zodResolver(formSchema),
 	});
 
+	console.log(form.formState.errors);
+
 	const onSubmit = (data: FormSchema) => {
 		alert("onSubmit called!");
 		console.log(data);
@@ -35,7 +37,9 @@ export default function GenerateQuote() {
 					<GeneralForm />
 					<Separator className="bg-slate-300" />
 					<VehicleForm />
-					<Button variant={"default"}>Submit</Button>
+					<Button type="submit" variant={"default"}>
+						Submit
+					</Button>
 				</form>
 			</FormProvider>
 		</Card>

@@ -1,6 +1,30 @@
 import { carriers } from "@/lib/constants";
 import { z } from "zod";
 
+const alternativeOptionSchema = z.array(
+	z.object({
+		name: z.string().min(1),
+		coverage_options: z.literal("Liability Only"),
+		deductible: z.enum(["$500", "$1000"]),
+		bodily_injury: z.enum([
+			"$35,000 / $80,000",
+			"$50,000 / $100,000",
+			"$100,000 / $300,000",
+		]),
+		medical_payments: z.enum(["$5,000", "$10,000", "$15,000", "$25,000"]),
+		property_damage: z.enum(["$50,000", "$100,000", "$150,000", "$250,000"]),
+		rental_car_coverage: z.boolean(),
+		gap_insurance: z.boolean(),
+		extra_coverage: z.boolean(),
+		renters_first_payment: z.string().min(1),
+		renters_monthly_payment: z.string().min(1),
+		fee: z.string().min(1),
+		payment_amount_first_payment: z.string().min(1),
+		payment_amount_monthly_payment: z.string().min(1),
+		full_payment: z.string().optional(),
+	}),
+);
+
 const vehicleSchema = z.object({
 	name: z.string().min(1).optional(),
 	coverage_options: z.enum(["Liability Only", "Full Coverage"]),
@@ -15,28 +39,7 @@ const vehicleSchema = z.object({
 	rental_car_coverage: z.boolean(),
 	gap_insurance: z.boolean(),
 	extra_coverage: z.boolean(),
-});
-
-const alternativeOptionSchema = z.object({
-	name: z.string().min(1),
-	coverage_options: z.literal("Liability Only"),
-	deductible: z.enum(["$500", "$1000"]),
-	bodily_injury: z.enum([
-		"$35,000 / $80,000",
-		"$50,000 / $100,000",
-		"$100,000 / $300,000",
-	]),
-	medical_payments: z.enum(["$5,000", "$10,000", "$15,000", "$25,000"]),
-	property_damage: z.enum(["$50,000", "$100,000", "$150,000", "$250,000"]),
-	rental_car_coverage: z.boolean(),
-	gap_insurance: z.boolean(),
-	extra_coverage: z.boolean(),
-	renters_first_payment: z.string().min(1),
-	renters_monthly_payment: z.string().min(1),
-	fee: z.string().min(1),
-	payment_amount_first_payment: z.string().min(1),
-	payment_amount_monthly_payment: z.string().min(1),
-	full_payment: z.string().optional(),
+	alternativeOption: alternativeOptionSchema.optional(),
 });
 
 export const formSchema = z.object({

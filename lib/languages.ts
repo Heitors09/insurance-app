@@ -53,7 +53,7 @@ export const languages = {
 		requiredField: "This field is required",
 		vehicles: "Vehicles",
 		vehicle: "Vehicle",
-		addVehicle: "Add Vehicle",
+		addVehicle: "New vehicle",
 		removeVehicle: "Remove Vehicle",
 		vehicleName: "Vehicle Description",
 		enterVehicleName: "Enter year, make and model",
