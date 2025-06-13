@@ -1,10 +1,10 @@
+import type { FormSchema } from "@/app/components/schemas";
 import { LanguageContext } from "@/app/language-context";
 import SaveQuoteButton from "@/components/save-button";
 import { Badge } from "@/components/ui/badge";
 import { toPng } from "html-to-image"; // @ts-ignore
 import { Download } from "lucide-react";
 import { useContext, useState } from "react";
-import type { FormSchema } from "../schemas";
 
 interface QuoteSummaryProps {
 	data: FormSchema;

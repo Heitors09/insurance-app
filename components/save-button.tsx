@@ -1,11 +1,11 @@
-import type { QuoteFormSchema } from "@/app/components/schemas";
+import type { FormSchema } from "@/app/components/schemas";
 import { AlertCircle, Check, Save } from "lucide-react";
 import { useState } from "react";
 
 const SaveQuoteButton = ({
 	data,
 	quoteNumber,
-}: { data: QuoteFormSchema; quoteNumber: string | undefined }) => {
+}: { data: FormSchema; quoteNumber: string | undefined }) => {
 	const [isSaving, setIsSaving] = useState(false);
 	const [saveStatus, setSaveStatus] = useState<"success" | "error" | null>(
 		null,
@@ -36,8 +36,8 @@ const SaveQuoteButton = ({
 				id: quoteId,
 				data: data,
 				savedAt: new Date().toISOString(),
-				clientName: data.clientName || "Cliente não informado",
-				carrier: data.carrier || "Seguradora não informada",
+				clientName: data.client_name || "Cliente não informado",
+				carrier: data.insurance_carrier || "Seguradora não informada",
 				totalAmount: calculateTotalAmount(data),
 			};
 
