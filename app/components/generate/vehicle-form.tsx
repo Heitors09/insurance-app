@@ -11,15 +11,37 @@ import {
 	SelectTrigger,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import {
-	bodilyInjuryConstant,
-	medicalPaymentsConstant,
-	propertyDamageConstant,
-} from "@/lib/constants";
 import { Plus, Shield, X } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import { Controller, useFieldArray, useFormContext } from "react-hook-form";
 import type { FormSchema } from "../schemas";
+
+const bodilyInjuryConstant = [
+	"$35,000 / $80,000",
+	"$50,000 / $100,000",
+	"$100,000 / $300,000",
+] as const;
+
+const medicalPaymentsConstant = [
+	"$5,000",
+	"$10,000",
+	"$15,000",
+	"$25,000",
+] as const;
+
+const propertyDamageConstant = [
+	"$50,000",
+	"$100,000",
+	"$150,000",
+	"$250,000",
+] as const;
+
+type ToggleState = {
+	deductibleEnabled: boolean;
+	bodilyInjuryEnabled: boolean;
+	medicalPaymentsEnabled: boolean;
+	propertyDamageEnabled: boolean;
+};
 
 export const VehicleForm = () => {
 	const translation = useContext(LanguageContext);
@@ -40,10 +62,30 @@ export const VehicleForm = () => {
 		};
 	}>({});
 
-	const watchedVehicleName = watch(`vehicles.${currentIndex}.name`);
-	const watchedCoverageOptions = watch(
-		`vehicles.${currentIndex}.coverage_options`,
+	// Observar todos os valores dos veículos
+	const vehicleNames = fields.map((_, index) =>
+		watch(`vehicles.${index}.name`),
 	);
+	const vehicleDeductibles = fields.map((_, index) =>
+		watch(`vehicles.${index}.deductible`),
+	);
+	const vehicleBodilyInjuries = fields.map((_, index) =>
+		watch(`vehicles.${index}.bodily_injury`),
+	);
+	const vehicleMedicalPayments = fields.map((_, index) =>
+		watch(`vehicles.${index}.medical_payments`),
+	);
+	const vehiclePropertyDamages = fields.map((_, index) =>
+		watch(`vehicles.${index}.property_damage`),
+	);
+	const vehicleCoverageOptions = fields.map((_, index) =>
+		watch(`vehicles.${index}.coverage_options`),
+	);
+	const watchedRentalCar = watch(
+		`vehicles.${currentIndex}.rental_car_coverage`,
+	);
+	const watchedGapInsurance = watch(`vehicles.${currentIndex}.gap_insurance`);
+	const watchedExtraCoverage = watch(`vehicles.${currentIndex}.extra_coverage`);
 
 	// Get current vehicle's toggle states
 	const currentVehicleStates = vehicleToggleStates[currentIndex] || {
@@ -76,47 +118,85 @@ export const VehicleForm = () => {
 
 	// Initialize toggle states for existing vehicles when currentIndex changes
 	useEffect(() => {
-		if (!vehicleToggleStates[currentIndex]) {
-			setVehicleToggleStates((prev) => ({
-				...prev,
-				[currentIndex]: {
-					deductibleEnabled: false,
-					bodilyInjuryEnabled: false,
-					medicalPaymentsEnabled: false,
-					propertyDamageEnabled: false,
-				},
-			}));
+		const currentVehicle = fields[currentIndex];
+		if (currentVehicle) {
+			const newState = {
+				deductibleEnabled: !!currentVehicle.deductible,
+				bodilyInjuryEnabled: !!currentVehicle.bodily_injury,
+				medicalPaymentsEnabled: !!currentVehicle.medical_payments,
+				propertyDamageEnabled: !!currentVehicle.property_damage,
+			};
+
+			setVehicleToggleStates((prev) => {
+				if (JSON.stringify(prev[currentIndex]) === JSON.stringify(newState)) {
+					return prev;
+				}
+				return {
+					...prev,
+					[currentIndex]: newState,
+				};
+			});
 		}
-	}, [currentIndex, vehicleToggleStates]);
+	}, [currentIndex, fields]);
 
 	// Auto-enable coverage options when Full Coverage is selected
 	useEffect(() => {
-		if (watchedCoverageOptions === "Full Coverage") {
-			setVehicleToggleStates((prev) => ({
-				...prev,
-				[currentIndex]: {
-					...prev[currentIndex],
-					deductibleEnabled: true,
-					bodilyInjuryEnabled: true,
-					propertyDamageEnabled: true,
-					// Keep medical payments as is - user can decide
-				},
-			}));
-		} else if (watchedCoverageOptions === "Liability Only") {
-			setVehicleToggleStates((prev) => ({
-				...prev,
-				[currentIndex]: {
-					...prev[currentIndex],
-					deductibleEnabled: false,
-					bodilyInjuryEnabled: true,
-					propertyDamageEnabled: true,
-					// Keep medical payments as is - it can be added to liability
-				},
-			}));
-		}
-	}, [watchedCoverageOptions, currentIndex]);
+		const currentCoverageOption = vehicleCoverageOptions[currentIndex];
+		if (currentCoverageOption === "Full Coverage") {
+			const newState = {
+				...currentVehicleStates,
+				deductibleEnabled: true,
+				bodilyInjuryEnabled: true,
+				propertyDamageEnabled: true,
+			};
 
-	console.log(fields);
+			setVehicleToggleStates((prev) => {
+				if (JSON.stringify(prev[currentIndex]) === JSON.stringify(newState)) {
+					return prev;
+				}
+				return {
+					...prev,
+					[currentIndex]: newState,
+				};
+			});
+		} else if (currentCoverageOption === "Liability Only") {
+			const newState = {
+				...currentVehicleStates,
+				deductibleEnabled: false,
+				bodilyInjuryEnabled: true,
+				propertyDamageEnabled: true,
+			};
+
+			setVehicleToggleStates((prev) => {
+				if (JSON.stringify(prev[currentIndex]) === JSON.stringify(newState)) {
+					return prev;
+				}
+				return {
+					...prev,
+					[currentIndex]: newState,
+				};
+			});
+		}
+	}, [vehicleCoverageOptions, currentIndex, currentVehicleStates]);
+
+	// Atualizar os valores dos campos de cobertura adicional quando mudar de veículo
+	useEffect(() => {
+		const currentVehicle = fields[currentIndex];
+		if (currentVehicle) {
+			setValue(
+				`vehicles.${currentIndex}.rental_car_coverage`,
+				currentVehicle.rental_car_coverage,
+			);
+			setValue(
+				`vehicles.${currentIndex}.gap_insurance`,
+				currentVehicle.gap_insurance,
+			);
+			setValue(
+				`vehicles.${currentIndex}.extra_coverage`,
+				currentVehicle.extra_coverage,
+			);
+		}
+	}, [currentIndex, fields, setValue]);
 
 	const addVehicle = () => {
 		append({
@@ -132,14 +212,13 @@ export const VehicleForm = () => {
 		});
 		const newIndex = fields.length;
 		setCurrentIndex(newIndex);
-		// Initialize toggle states for new vehicle
 		setVehicleToggleStates((prev) => ({
 			...prev,
 			[newIndex]: {
 				deductibleEnabled: false,
-				bodilyInjuryEnabled: false,
+				bodilyInjuryEnabled: true,
 				medicalPaymentsEnabled: false,
-				propertyDamageEnabled: false,
+				propertyDamageEnabled: true,
 			},
 		}));
 	};
@@ -171,8 +250,7 @@ export const VehicleForm = () => {
 
 			<div className="flex flex-wrap gap-2">
 				{fields.map((field, index) => {
-					const vehicleName =
-						index === currentIndex ? watchedVehicleName : field.name;
+					const vehicleName = vehicleNames[index];
 
 					return (
 						<div key={field.id} className="relative">
@@ -245,7 +323,7 @@ export const VehicleForm = () => {
 									<Button
 										type="button"
 										variant={
-											watchedCoverageOptions === "Liability Only"
+											vehicleCoverageOptions[currentIndex] === "Liability Only"
 												? "default"
 												: "secondary"
 										}
@@ -263,7 +341,7 @@ export const VehicleForm = () => {
 									<Button
 										type="button"
 										variant={
-											watchedCoverageOptions === "Full Coverage"
+											vehicleCoverageOptions[currentIndex] === "Full Coverage"
 												? "default"
 												: "secondary"
 										}
@@ -295,8 +373,16 @@ export const VehicleForm = () => {
 									render={({ field, fieldState }) => (
 										<div>
 											<RadioGroup
-												value={field.value}
-												onValueChange={field.onChange}
+												value={
+													vehicleDeductibles[currentIndex] as "$500" | "$1000"
+												}
+												onValueChange={(value: "$500" | "$1000") => {
+													field.onChange(value);
+													setValue(
+														`vehicles.${currentIndex}.deductible`,
+														value,
+													);
+												}}
 											>
 												<div className="flex gap-4">
 													<div className="flex items-center space-x-2">
@@ -346,9 +432,22 @@ export const VehicleForm = () => {
 								name={`vehicles.${currentIndex}.bodily_injury`}
 								control={control}
 								render={({ field, fieldState }) => (
-									<Select value={field.value} onValueChange={field.onChange}>
+									<Select
+										value={
+											vehicleBodilyInjuries[
+												currentIndex
+											] as (typeof bodilyInjuryConstant)[number]
+										}
+										onValueChange={(
+											value: (typeof bodilyInjuryConstant)[number],
+										) => {
+											field.onChange(value);
+											setValue(`vehicles.${currentIndex}.bodily_injury`, value);
+										}}
+									>
 										<SelectTrigger className="ring-slate-300 border-none ring-1 rounded-[8px] w-full flex items-center justify-between text-sm px-4 py-2">
-											{field.value || translation?.translations.bodilyInjury}
+											{vehicleBodilyInjuries[currentIndex] ||
+												translation?.translations.bodilyInjury}
 										</SelectTrigger>
 										<SelectContent
 											side="bottom"
@@ -393,9 +492,25 @@ export const VehicleForm = () => {
 							name={`vehicles.${currentIndex}.medical_payments`}
 							control={control}
 							render={({ field, fieldState }) => (
-								<Select value={field.value} onValueChange={field.onChange}>
+								<Select
+									value={
+										vehicleMedicalPayments[
+											currentIndex
+										] as (typeof medicalPaymentsConstant)[number]
+									}
+									onValueChange={(
+										value: (typeof medicalPaymentsConstant)[number],
+									) => {
+										field.onChange(value);
+										setValue(
+											`vehicles.${currentIndex}.medical_payments`,
+											value,
+										);
+									}}
+								>
 									<SelectTrigger className="ring-slate-300 border-none ring-1 rounded-[8px] w-full flex items-center justify-between text-sm px-4 py-2">
-										{field.value || translation?.translations.medicalPayments}
+										{vehicleMedicalPayments[currentIndex] ||
+											translation?.translations.medicalPayments}
 									</SelectTrigger>
 									<SelectContent
 										side="bottom"
@@ -439,9 +554,22 @@ export const VehicleForm = () => {
 							name={`vehicles.${currentIndex}.property_damage`}
 							control={control}
 							render={({ field, fieldState }) => (
-								<Select value={field.value} onValueChange={field.onChange}>
+								<Select
+									value={
+										vehiclePropertyDamages[
+											currentIndex
+										] as (typeof propertyDamageConstant)[number]
+									}
+									onValueChange={(
+										value: (typeof propertyDamageConstant)[number],
+									) => {
+										field.onChange(value);
+										setValue(`vehicles.${currentIndex}.property_damage`, value);
+									}}
+								>
 									<SelectTrigger className="ring-slate-300 border-none ring-1 rounded-[8px] w-full flex items-center justify-between text-sm px-4 py-2">
-										{field.value || translation?.translations.propertyDamage}
+										{vehiclePropertyDamages[currentIndex] ||
+											translation?.translations.propertyDamage}
 									</SelectTrigger>
 									<SelectContent
 										side="bottom"

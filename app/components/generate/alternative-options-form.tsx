@@ -44,11 +44,48 @@ export const AlternativeOptionsForm = () => {
 		[optionIndex: number]: ToggleState;
 	}>({});
 
-	const watchedOptionName = watch(
-		`alternativeOption.${currentIndex}.name` as const,
+	// Observar todos os valores das opções
+	const optionNames = fields.map((_, index) =>
+		watch(`alternativeOption.${index}.name`),
 	);
-	const watchedCoverageOptions = watch(
-		`alternativeOption.${currentIndex}.coverage_options` as const,
+	const optionDeductibles = fields.map((_, index) =>
+		watch(`alternativeOption.${index}.deductible`),
+	);
+	const optionBodilyInjuries = fields.map((_, index) =>
+		watch(`alternativeOption.${index}.bodily_injury`),
+	);
+	const optionMedicalPayments = fields.map((_, index) =>
+		watch(`alternativeOption.${index}.medical_payments`),
+	);
+	const optionPropertyDamages = fields.map((_, index) =>
+		watch(`alternativeOption.${index}.property_damage`),
+	);
+	const optionCoverageOptions = fields.map((_, index) =>
+		watch(`alternativeOption.${index}.coverage_options`),
+	);
+	const optionFirstPayments = fields.map((_, index) =>
+		watch(`alternativeOption.${index}.payment_amount_first_payment`),
+	);
+	const optionMonthlyPayments = fields.map((_, index) =>
+		watch(`alternativeOption.${index}.payment_amount_monthly_payment`),
+	);
+	const optionRentersFirstPayments = fields.map((_, index) =>
+		watch(`alternativeOption.${index}.renters_first_payment`),
+	);
+	const optionRentersMonthlyPayments = fields.map((_, index) =>
+		watch(`alternativeOption.${index}.renters_monthly_payment`),
+	);
+	const optionFees = fields.map((_, index) =>
+		watch(`alternativeOption.${index}.fee`),
+	);
+	const watchedRentalCar = watch(
+		`alternativeOption.${currentIndex}.rental_car_coverage`,
+	);
+	const watchedGapInsurance = watch(
+		`alternativeOption.${currentIndex}.gap_insurance`,
+	);
+	const watchedExtraCoverage = watch(
+		`alternativeOption.${currentIndex}.extra_coverage`,
 	);
 
 	// Get current option's toggle states
@@ -83,35 +120,52 @@ export const AlternativeOptionsForm = () => {
 
 	// Initialize toggle states for existing options when currentIndex changes
 	useEffect(() => {
-		if (!optionToggleStates[currentIndex]) {
-			setOptionToggleStates((prev) => ({
-				...prev,
-				[currentIndex]: {
-					deductibleEnabled: false,
-					bodilyInjuryEnabled: false,
-					medicalPaymentsEnabled: false,
-					propertyDamageEnabled: false,
-					rentersInsuranceEnabled: false,
-					feeEnabled: false,
-				},
-			}));
+		const currentOption = fields[currentIndex];
+		if (currentOption) {
+			const newState = {
+				deductibleEnabled: !!currentOption.deductible,
+				bodilyInjuryEnabled: !!currentOption.bodily_injury,
+				medicalPaymentsEnabled: !!currentOption.medical_payments,
+				propertyDamageEnabled: !!currentOption.property_damage,
+				rentersInsuranceEnabled:
+					!!currentOption.renters_first_payment ||
+					!!currentOption.renters_monthly_payment,
+				feeEnabled: !!currentOption.fee,
+			};
+
+			setOptionToggleStates((prev) => {
+				if (JSON.stringify(prev[currentIndex]) === JSON.stringify(newState)) {
+					return prev;
+				}
+				return {
+					...prev,
+					[currentIndex]: newState,
+				};
+			});
 		}
-	}, [currentIndex, optionToggleStates]);
+	}, [currentIndex, fields]);
 
 	// Auto-enable coverage options when Liability Only is selected
 	useEffect(() => {
-		if (watchedCoverageOptions === "Liability Only") {
-			setOptionToggleStates((prev) => ({
-				...prev,
-				[currentIndex]: {
-					...prev[currentIndex],
-					bodilyInjuryEnabled: true,
-					propertyDamageEnabled: true,
-					// Keep other toggles as is
-				},
-			}));
+		const currentCoverageOption = optionCoverageOptions[currentIndex];
+		if (currentCoverageOption === "Liability Only") {
+			const newState = {
+				...currentOptionStates,
+				bodilyInjuryEnabled: true,
+				propertyDamageEnabled: true,
+			};
+
+			setOptionToggleStates((prev) => {
+				if (JSON.stringify(prev[currentIndex]) === JSON.stringify(newState)) {
+					return prev;
+				}
+				return {
+					...prev,
+					[currentIndex]: newState,
+				};
+			});
 		}
-	}, [watchedCoverageOptions, currentIndex]);
+	}, [optionCoverageOptions, currentIndex, currentOptionStates]);
 
 	const addOption = () => {
 		const newOption: AlternativeOptionSchema = {
@@ -137,9 +191,9 @@ export const AlternativeOptionsForm = () => {
 			...prev,
 			[newIndex]: {
 				deductibleEnabled: false,
-				bodilyInjuryEnabled: false,
+				bodilyInjuryEnabled: true,
 				medicalPaymentsEnabled: false,
-				propertyDamageEnabled: false,
+				propertyDamageEnabled: true,
 				rentersInsuranceEnabled: false,
 				feeEnabled: false,
 			},
@@ -173,8 +227,7 @@ export const AlternativeOptionsForm = () => {
 
 			<div className="flex flex-wrap gap-2">
 				{fields.map((field, index) => {
-					const optionName =
-						index === currentIndex ? watchedOptionName : field.name;
+					const optionName = optionNames[index];
 
 					return (
 						<div key={field.id} className="relative">
@@ -223,6 +276,14 @@ export const AlternativeOptionsForm = () => {
 										<Input
 											id={`alternativeOption.${currentIndex}.name`}
 											{...field}
+											value={optionNames[currentIndex] || ""}
+											onChange={(e) => {
+												field.onChange(e);
+												setValue(
+													`alternativeOption.${currentIndex}.name`,
+													e.target.value,
+												);
+											}}
 											placeholder={
 												translation?.translations
 													.alternativeOptionNamePlaceholder
@@ -254,7 +315,7 @@ export const AlternativeOptionsForm = () => {
 									<Button
 										type="button"
 										variant={
-											watchedCoverageOptions === "Liability Only"
+											optionCoverageOptions[currentIndex] === "Liability Only"
 												? "default"
 												: "secondary"
 										}
@@ -277,7 +338,7 @@ export const AlternativeOptionsForm = () => {
 								<Switch
 									checked={deductibleEnabled}
 									onCheckedChange={(value) =>
-										watchedCoverageOptions === "Liability Only"
+										optionCoverageOptions[currentIndex] === "Liability Only"
 											? null
 											: updateToggleState("deductibleEnabled", value)
 									}
@@ -290,7 +351,7 @@ export const AlternativeOptionsForm = () => {
 									render={({ field, fieldState }) => (
 										<div>
 											<RadioGroup
-												value={field.value}
+												value={optionDeductibles[currentIndex]}
 												onValueChange={field.onChange}
 											>
 												<div className="flex gap-4">
@@ -327,16 +388,18 @@ export const AlternativeOptionsForm = () => {
 								</Label>
 								<Switch
 									checked={
-										watchedCoverageOptions === "Liability Only"
+										optionCoverageOptions[currentIndex] === "Liability Only"
 											? true
 											: bodilyInjuryEnabled
 									}
 									onCheckedChange={(value) =>
-										watchedCoverageOptions === "Liability Only"
+										optionCoverageOptions[currentIndex] === "Liability Only"
 											? null
 											: updateToggleState("bodilyInjuryEnabled", value)
 									}
-									disabled={watchedCoverageOptions === "Liability Only"}
+									disabled={
+										optionCoverageOptions[currentIndex] === "Liability Only"
+									}
 								/>
 							</div>
 
@@ -345,9 +408,13 @@ export const AlternativeOptionsForm = () => {
 									name={`alternativeOption.${currentIndex}.bodily_injury`}
 									control={control}
 									render={({ field, fieldState }) => (
-										<Select value={field.value} onValueChange={field.onChange}>
+										<Select
+											value={optionBodilyInjuries[currentIndex]}
+											onValueChange={field.onChange}
+										>
 											<SelectTrigger className="ring-slate-300 border-none ring-1 rounded-[8px] w-full flex items-center justify-between text-sm px-4 py-2">
-												{field.value || translation?.translations.bodilyInjury}
+												{optionBodilyInjuries[currentIndex] ||
+													translation?.translations.bodilyInjury}
 											</SelectTrigger>
 											<SelectContent
 												side="bottom"
@@ -391,9 +458,12 @@ export const AlternativeOptionsForm = () => {
 									name={`alternativeOption.${currentIndex}.medical_payments`}
 									control={control}
 									render={({ field, fieldState }) => (
-										<Select value={field.value} onValueChange={field.onChange}>
+										<Select
+											value={optionMedicalPayments[currentIndex]}
+											onValueChange={field.onChange}
+										>
 											<SelectTrigger className="ring-slate-300 border-none ring-1 rounded-[8px] w-full flex items-center justify-between text-sm px-4 py-2">
-												{field.value ||
+												{optionMedicalPayments[currentIndex] ||
 													translation?.translations.medicalPayments}
 											</SelectTrigger>
 											<SelectContent
@@ -427,16 +497,18 @@ export const AlternativeOptionsForm = () => {
 								</Label>
 								<Switch
 									checked={
-										watchedCoverageOptions === "Liability Only"
+										optionCoverageOptions[currentIndex] === "Liability Only"
 											? true
 											: propertyDamageEnabled
 									}
 									onCheckedChange={(value) =>
-										watchedCoverageOptions === "Liability Only"
+										optionCoverageOptions[currentIndex] === "Liability Only"
 											? null
 											: updateToggleState("propertyDamageEnabled", value)
 									}
-									disabled={watchedCoverageOptions === "Liability Only"}
+									disabled={
+										optionCoverageOptions[currentIndex] === "Liability Only"
+									}
 								/>
 							</div>
 
@@ -445,9 +517,12 @@ export const AlternativeOptionsForm = () => {
 									name={`alternativeOption.${currentIndex}.property_damage`}
 									control={control}
 									render={({ field, fieldState }) => (
-										<Select value={field.value} onValueChange={field.onChange}>
+										<Select
+											value={optionPropertyDamages[currentIndex]}
+											onValueChange={field.onChange}
+										>
 											<SelectTrigger className="ring-slate-300 border-none ring-1 rounded-[8px] w-full flex items-center justify-between text-sm px-4 py-2">
-												{field.value ||
+												{optionPropertyDamages[currentIndex] ||
 													translation?.translations.propertyDamage}
 											</SelectTrigger>
 											<SelectContent
@@ -484,7 +559,7 @@ export const AlternativeOptionsForm = () => {
 									control={control}
 									render={({ field }) => (
 										<Switch
-											checked={field.value}
+											checked={watchedRentalCar}
 											onCheckedChange={field.onChange}
 										/>
 									)}
@@ -501,7 +576,7 @@ export const AlternativeOptionsForm = () => {
 									control={control}
 									render={({ field }) => (
 										<Switch
-											checked={field.value}
+											checked={watchedGapInsurance}
 											onCheckedChange={field.onChange}
 										/>
 									)}
@@ -518,7 +593,7 @@ export const AlternativeOptionsForm = () => {
 									control={control}
 									render={({ field }) => (
 										<Switch
-											checked={field.value}
+											checked={watchedExtraCoverage}
 											onCheckedChange={field.onChange}
 										/>
 									)}
@@ -559,6 +634,14 @@ export const AlternativeOptionsForm = () => {
 												<Input
 													id="renters_first_payment"
 													{...field}
+													value={optionRentersFirstPayments[currentIndex] || ""}
+													onChange={(e) => {
+														field.onChange(e);
+														setValue(
+															`alternativeOption.${currentIndex}.renters_first_payment`,
+															e.target.value,
+														);
+													}}
 													placeholder={
 														translation?.translations.rentersFirstPayment
 													}
@@ -589,6 +672,16 @@ export const AlternativeOptionsForm = () => {
 												<Input
 													id="renters_monthly_payment"
 													{...field}
+													value={
+														optionRentersMonthlyPayments[currentIndex] || ""
+													}
+													onChange={(e) => {
+														field.onChange(e);
+														setValue(
+															`alternativeOption.${currentIndex}.renters_monthly_payment`,
+															e.target.value,
+														);
+													}}
 													placeholder={
 														translation?.translations.rentersMonthlyPayment
 													}
@@ -629,6 +722,14 @@ export const AlternativeOptionsForm = () => {
 											<Input
 												id="fee"
 												{...field}
+												value={optionFees[currentIndex] || ""}
+												onChange={(e) => {
+													field.onChange(e);
+													setValue(
+														`alternativeOption.${currentIndex}.fee`,
+														e.target.value,
+													);
+												}}
 												placeholder={translation?.translations.feeAmount}
 												className="ring-1 ring-slate-300 rounded-[8px] border-none"
 											/>
@@ -662,6 +763,14 @@ export const AlternativeOptionsForm = () => {
 											<Input
 												id="payment_amount_first_payment"
 												{...field}
+												value={optionFirstPayments[currentIndex] || ""}
+												onChange={(e) => {
+													field.onChange(e);
+													setValue(
+														`alternativeOption.${currentIndex}.payment_amount_first_payment`,
+														e.target.value,
+													);
+												}}
 												placeholder={translation?.translations.firstPayment}
 												className="ring-1 ring-slate-300 rounded-[8px] border-none"
 											/>
@@ -690,6 +799,14 @@ export const AlternativeOptionsForm = () => {
 											<Input
 												id="payment_amount_monthly_payment"
 												{...field}
+												value={optionMonthlyPayments[currentIndex] || ""}
+												onChange={(e) => {
+													field.onChange(e);
+													setValue(
+														`alternativeOption.${currentIndex}.payment_amount_monthly_payment`,
+														e.target.value,
+													);
+												}}
 												placeholder={translation?.translations.monthlyPayment}
 												className="ring-1 ring-slate-300 rounded-[8px] border-none"
 											/>
