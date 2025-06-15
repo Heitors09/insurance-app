@@ -33,7 +33,7 @@ export default function Home() {
 						</Button>
 					}
 				</DropdownMenuTrigger>
-				<DropdownMenuContent className="w-[200px] mt-1 ring-1 ring-slate-200 bg-slate-100 border-none rounded-[8px]">
+				<DropdownMenuContent className="w-[200px] mt-2 ring-1 ring-slate-200 bg-slate-100 border-none rounded-[8px]">
 					<DropdownMenuItem
 						onClick={() => translation?.setLanguage("English")}
 						className="hover:text-slate-900 text-slate-500"
