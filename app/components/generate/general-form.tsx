@@ -32,16 +32,14 @@ export const GeneralForm = () => {
 						</SelectTrigger>
 						<SelectContent className="w-[736px] mt-1 ring-1 ring-slate-200 bg-slate-100 border-none rounded-[8px]">
 							<SelectItem
-								value={translation?.translations.autoInsuranceType || ""}
+								value="Auto"
 								className="hover:text-slate-900 text-slate-500"
 							>
 								{translation?.translations.autoInsuranceType}
 							</SelectItem>
 							<SelectSeparator className="bg-slate-300 mx-2" />
 							<SelectItem
-								value={
-									translation?.translations.commercialAutoInsuranceType || ""
-								}
+								value="Commercial Auto"
 								className="hover:text-slate-900 text-slate-500"
 							>
 								{translation?.translations.commercialAutoInsuranceType}

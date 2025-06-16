@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useContext, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { type FormSchema, formSchema } from "../schemas";
 import { AlternativeOptionsForm } from "./alternative-options-form";
 import { GeneralForm } from "./general-form";
@@ -24,7 +25,12 @@ export default function GenerateQuote() {
 	const [quoteData, setQuoteData] = useState<FormSchema | null>(null);
 
 	const onSubmit = (data: FormSchema) => {
-		setQuoteData(data);
+		try {
+			setQuoteData(data);
+			toast.success("Quote generated successfully");
+		} catch (error) {
+			toast.error(`Error generating quote: ${error}`);
+		}
 	};
 
 	if (quoteData) {

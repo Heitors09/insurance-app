@@ -1,5 +1,7 @@
-import { Toaster } from "@/components/ui/sonner";
+"use client";
+
 import { Inter } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 import { LanguageProvider } from "./language-context";
 
@@ -17,7 +19,7 @@ export default function RootLayout({
 		<html lang="en">
 			<body className={`${inter.className} antialiased`}>
 				<LanguageProvider>{children}</LanguageProvider>
-				<Toaster />
+				<Toaster richColors />
 			</body>
 		</html>
 	);
