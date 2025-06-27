@@ -1,29 +1,3 @@
-export const carriers = [
-	"Progressive",
-	"Bristol West",
-	"National General",
-	"Embark",
-	"Travelers",
-	"Geico",
-	"Safeco",
-	"Hannover",
-	"The Hartford",
-	"Pilgrim",
-] as const;
-
-export const csrNames = [
-	"Lukas Fraga",
-	"Gabriel Oliviera",
-	"Ricardo Mendonca",
-	"Pablo Lima",
-	"Christian Benevides",
-	"Matheus Ferreira",
-	"Marc Etienne",
-	"Dalynx",
-	"Guilherme Souza",
-	"Alexandre Dias",
-];
-
 export const bodilyInjuryConstant = [
 	"$35,000 / $80,000",
 	"$50,000 / $100,000",

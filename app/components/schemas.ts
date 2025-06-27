@@ -1,17 +1,12 @@
-import { carriers } from "@/lib/constants";
 import { z } from "zod";
 
 const alternativeOptionSchema = z.object({
 	name: z.string().min(1),
 	coverage_options: z.literal("Liability Only"),
 	deductible: z.enum(["$500", "$1000"]),
-	bodily_injury: z.enum([
-		"$35,000 / $80,000",
-		"$50,000 / $100,000",
-		"$100,000 / $300,000",
-	]),
-	medical_payments: z.enum(["$5,000", "$10,000", "$15,000", "$25,000"]),
-	property_damage: z.enum(["$50,000", "$100,000", "$150,000", "$250,000"]),
+	bodily_injury: z.string().min(1),
+	medical_payments: z.string().min(1),
+	property_damage: z.string().min(1),
 	rental_car_coverage: z.boolean(),
 	gap_insurance: z.boolean(),
 	extra_coverage: z.boolean(),
@@ -27,13 +22,9 @@ const vehicleSchema = z.object({
 	name: z.string().min(1).optional(),
 	coverage_options: z.enum(["Liability Only", "Full Coverage"]),
 	deductible: z.enum(["$500", "$1000"]),
-	bodily_injury: z.enum([
-		"$35,000 / $80,000",
-		"$50,000 / $100,000",
-		"$100,000 / $300,000",
-	]),
-	medical_payments: z.enum(["$5,000", "$10,000", "$15,000", "$25,000"]),
-	property_damage: z.enum(["$50,000", "$100,000", "$150,000", "$250,000"]),
+	bodily_injury: z.string().min(1),
+	medical_payments: z.string().min(1),
+	property_damage: z.string().min(1),
 	rental_car_coverage: z.boolean(),
 	gap_insurance: z.boolean(),
 	extra_coverage: z.boolean(),
@@ -44,7 +35,7 @@ export const formSchema = z.object({
 	agent_name: z.string().min(1),
 	csr: z.string().min(1),
 	client_name: z.string().min(1),
-	insurance_carrier: z.enum(carriers),
+	insurance_carrier: z.string().min(1),
 	policy_term: z.enum(["6 months", "12 months"]),
 	quote_number: z.string().optional(),
 	renters_first_payment: z.string().min(1).optional().or(z.literal("")),

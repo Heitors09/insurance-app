@@ -59,7 +59,7 @@ export default function PaymentForm() {
 											placeholder={
 												translation?.translations.rentersFirstPayment
 											}
-											className="ring-1 ring-slate-200 rounded-md border-none bg-slate-50 text-sm"
+											className="ring-1 ring-slate-200 rounded-[8px] border-none bg-slate-50 text-sm"
 										/>
 										{fieldState.error && (
 											<p className="text-xs text-red-500 mt-1">
@@ -89,7 +89,7 @@ export default function PaymentForm() {
 											placeholder={
 												translation?.translations.rentersMonthlyPayment
 											}
-											className="ring-1 ring-slate-200 rounded-md border-none bg-slate-50 text-sm"
+											className="ring-1 ring-slate-200 rounded-[8px] border-none bg-slate-50 text-sm"
 										/>
 										{fieldState.error && (
 											<p className="text-xs text-red-500 mt-1">
@@ -130,7 +130,7 @@ export default function PaymentForm() {
 										id="fee"
 										{...field}
 										placeholder={translation?.translations.feeAmount}
-										className="ring-1 ring-slate-200 rounded-md border-none bg-slate-50 text-sm"
+										className="ring-1 ring-slate-200 rounded-[8px] border-none bg-slate-50 text-sm"
 									/>
 									{fieldState.error && (
 										<p className="text-xs text-red-500 mt-1">
@@ -167,7 +167,7 @@ export default function PaymentForm() {
 										id="payment_amount_first_payment"
 										{...field}
 										placeholder={translation?.translations.firstPayment}
-										className="ring-1 ring-slate-200 rounded-md border-none bg-slate-50 text-sm"
+										className="ring-1 ring-slate-200 rounded-[8px] border-none bg-slate-50 text-sm"
 									/>
 									{fieldState.error && (
 										<p className="text-xs text-red-500 mt-1">
@@ -195,7 +195,7 @@ export default function PaymentForm() {
 										id="payment_amount_monthly_payment"
 										{...field}
 										placeholder={translation?.translations.monthlyPayment}
-										className="ring-1 ring-slate-200 rounded-md border-none bg-slate-50 text-sm"
+										className="ring-1 ring-slate-200 rounded-[8px] border-none bg-slate-50 text-sm"
 									/>
 									{fieldState.error && (
 										<p className="text-xs text-red-500 mt-1">
@@ -233,7 +233,7 @@ export default function PaymentForm() {
 											id="full_payment"
 											{...field}
 											placeholder={translation?.translations.fullPayment}
-											className="ring-1 ring-slate-200 rounded-md border-none bg-slate-50 text-sm"
+											className="ring-1 ring-slate-200 rounded-[8px] border-none bg-slate-50 text-sm"
 										/>
 										{fieldState.error && (
 											<p className="text-xs text-red-500 mt-1">

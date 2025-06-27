@@ -2,6 +2,7 @@
 
 import { languages } from "@/lib/languages";
 import type { Languages } from "@/lib/types";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { type ReactNode, createContext, useState } from "react";
 
 interface LanguageContextType {
@@ -12,7 +13,9 @@ interface LanguageContextType {
 
 export const LanguageContext = createContext<LanguageContextType | null>(null);
 
-export const LanguageProvider = ({ children }: { children: ReactNode }) => {
+const queryClient = new QueryClient();
+
+export const AppWrapper = ({ children }: { children: ReactNode }) => {
 	const [currentLanguage, setCurrentLanguage] = useState<Languages>("English");
 
 	const translations = languages[currentLanguage as Languages];
@@ -29,7 +32,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
 
 	return (
 		<LanguageContext.Provider value={value}>
-			{children}
+			<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 		</LanguageContext.Provider>
 	);
 };

@@ -12,13 +12,16 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import {
-	bodilyInjuryConstant,
-	medicalPaymentsConstant,
-	propertyDamageConstant,
-} from "@/lib/constants";
-import { Plus, Shield, X } from "lucide-react";
+	fetchBodilyInjuryOptions,
+	fetchMedicalPaymentsOptions,
+	fetchPropertyDamageOptions,
+	supabase,
+} from "@/lib/create";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Check, Plus, Shield, X } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import { Controller, useFieldArray, useFormContext } from "react-hook-form";
+import { toast } from "sonner";
 import type { AlternativeOptionSchema, FormSchema } from "../schemas";
 
 type ToggleState = {
@@ -33,10 +36,82 @@ type ToggleState = {
 export const AlternativeOptionsForm = () => {
 	const translation = useContext(LanguageContext);
 	const { control, watch, setValue } = useFormContext<FormSchema>();
+	const queryClient = useQueryClient();
 
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: "alternativeOption",
+	});
+
+	// Estados para inputs customizados
+	const [showCustomBodilyInjury, setShowCustomBodilyInjury] = useState(false);
+	const [showCustomMedicalPayments, setShowCustomMedicalPayments] =
+		useState(false);
+	const [showCustomPropertyDamage, setShowCustomPropertyDamage] =
+		useState(false);
+	const [customBodilyInjury, setCustomBodilyInjury] = useState("");
+	const [customMedicalPayments, setCustomMedicalPayments] = useState("");
+	const [customPropertyDamage, setCustomPropertyDamage] = useState("");
+	const [isLoading, setIsLoading] = useState(false);
+
+	// Função para inserir valores customizados
+	const handleInsertNewCustomValue = async (
+		option: string,
+		value: string,
+		name: string,
+	) => {
+		setIsLoading(true);
+		try {
+			const { error } = await supabase.from(option).insert([{ [name]: value }]);
+			setIsLoading(false);
+			toast.success(`${value} added successfully`);
+
+			if (error) {
+				console.error("Erro ao inserir:", error);
+				toast.error(`${value} already exists`);
+				return;
+			}
+
+			// Invalida e refaz as queries baseado no tipo de insert
+			if (option === "bodily_options") {
+				await queryClient.invalidateQueries({
+					queryKey: ["bodily-injury-options"],
+				});
+				setCustomBodilyInjury("");
+				setShowCustomBodilyInjury(false);
+			} else if (option === "medical_options") {
+				await queryClient.invalidateQueries({
+					queryKey: ["medical-payments-options"],
+				});
+				setCustomMedicalPayments("");
+				setShowCustomMedicalPayments(false);
+			} else if (option === "property_options") {
+				await queryClient.invalidateQueries({
+					queryKey: ["property-damage-options"],
+				});
+				setCustomPropertyDamage("");
+				setShowCustomPropertyDamage(false);
+			}
+		} catch (error) {
+			console.error("Erro ao inserir:", error);
+		}
+	};
+
+	// Fetch options from API
+	const { data: bodilyInjuryOptions, error: bodilyInjuryError } = useQuery({
+		queryKey: ["bodily-injury-options"],
+		queryFn: fetchBodilyInjuryOptions,
+	});
+
+	const { data: medicalPaymentsOptions, error: medicalPaymentsError } =
+		useQuery({
+			queryKey: ["medical-payments-options"],
+			queryFn: fetchMedicalPaymentsOptions,
+		});
+
+	const { data: propertyDamageOptions, error: propertyDamageError } = useQuery({
+		queryKey: ["property-damage-options"],
+		queryFn: fetchPropertyDamageOptions,
 	});
 
 	const [currentIndex, setCurrentIndex] = useState(0);
@@ -410,7 +485,14 @@ export const AlternativeOptionsForm = () => {
 									render={({ field, fieldState }) => (
 										<Select
 											value={optionBodilyInjuries[currentIndex]}
-											onValueChange={field.onChange}
+											onValueChange={(value: string) => {
+												if (value === "customBodilyInjury") {
+													setShowCustomBodilyInjury(true);
+												} else {
+													setShowCustomBodilyInjury(false);
+													field.onChange(value);
+												}
+											}}
 										>
 											<SelectTrigger className="ring-slate-300 border-none ring-1 rounded-[8px] w-full flex items-center justify-between text-sm px-4 py-2">
 												{optionBodilyInjuries[currentIndex] ||
@@ -420,15 +502,24 @@ export const AlternativeOptionsForm = () => {
 												side="bottom"
 												className="w-[736px] mt-1 ring-1 ring-slate-200 bg-slate-100 border-none rounded-[8px]"
 											>
-												{bodilyInjuryConstant.map((bodily) => (
+												{bodilyInjuryOptions?.map((bodily) => (
 													<SelectItem
-														value={bodily}
-														key={bodily}
+														value={bodily.bodily_coverage}
+														key={bodily.id}
 														className="hover:text-slate-900 text-slate-500"
 													>
-														{bodily}
+														{bodily.bodily_coverage}
 													</SelectItem>
 												))}
+												<SelectItem
+													value="customBodilyInjury"
+													className="hover:text-slate-900 text-slate-500 border-t border-slate-200"
+												>
+													<div className="flex items-center gap-2">
+														<Plus size={14} />
+														Custom Bodily Injury
+													</div>
+												</SelectItem>
 											</SelectContent>
 											{fieldState.error && (
 												<p className="text-red-500 text-sm mt-1">
@@ -438,6 +529,30 @@ export const AlternativeOptionsForm = () => {
 										</Select>
 									)}
 								/>
+							)}
+							{showCustomBodilyInjury && (
+								<div className="flex items-center gap-2">
+									<Input
+										id="custom_bodily_injury"
+										onChange={(e) => setCustomBodilyInjury(e.target.value)}
+										placeholder="Custom Bodily Injury"
+										className="ring-1 ring-slate-300 rounded-[8px] border-none"
+									/>
+									<Button
+										type="button"
+										variant="default"
+										disabled={!customBodilyInjury || isLoading}
+										onClick={() =>
+											handleInsertNewCustomValue(
+												"bodily_options",
+												customBodilyInjury,
+												"bodily_coverage",
+											)
+										}
+									>
+										<Check size={14} />
+									</Button>
+								</div>
 							)}
 
 							{/* Medical Payments */}
@@ -460,7 +575,14 @@ export const AlternativeOptionsForm = () => {
 									render={({ field, fieldState }) => (
 										<Select
 											value={optionMedicalPayments[currentIndex]}
-											onValueChange={field.onChange}
+											onValueChange={(value: string) => {
+												if (value === "customMedicalPayments") {
+													setShowCustomMedicalPayments(true);
+												} else {
+													setShowCustomMedicalPayments(false);
+													field.onChange(value);
+												}
+											}}
 										>
 											<SelectTrigger className="ring-slate-300 border-none ring-1 rounded-[8px] w-full flex items-center justify-between text-sm px-4 py-2">
 												{optionMedicalPayments[currentIndex] ||
@@ -470,15 +592,24 @@ export const AlternativeOptionsForm = () => {
 												side="bottom"
 												className="w-[736px] mt-1 ring-1 ring-slate-200 bg-slate-100 border-none rounded-[8px]"
 											>
-												{medicalPaymentsConstant.map((medical) => (
+												{medicalPaymentsOptions?.map((medical) => (
 													<SelectItem
-														value={medical}
-														key={medical}
+														value={medical.medical_coverage}
+														key={medical.id}
 														className="hover:text-slate-900 text-slate-500"
 													>
-														{medical}
+														{medical.medical_coverage}
 													</SelectItem>
 												))}
+												<SelectItem
+													value="customMedicalPayments"
+													className="hover:text-slate-900 text-slate-500 border-t border-slate-200"
+												>
+													<div className="flex items-center gap-2">
+														<Plus size={14} />
+														Custom Medical Payments
+													</div>
+												</SelectItem>
 											</SelectContent>
 											{fieldState.error && (
 												<p className="text-red-500 text-sm mt-1">
@@ -488,6 +619,30 @@ export const AlternativeOptionsForm = () => {
 										</Select>
 									)}
 								/>
+							)}
+							{showCustomMedicalPayments && (
+								<div className="flex items-center gap-2">
+									<Input
+										id="custom_medical_payments"
+										onChange={(e) => setCustomMedicalPayments(e.target.value)}
+										placeholder="Custom Medical Payments"
+										className="ring-1 ring-slate-300 rounded-[8px] border-none"
+									/>
+									<Button
+										type="button"
+										variant="default"
+										disabled={!customMedicalPayments || isLoading}
+										onClick={() =>
+											handleInsertNewCustomValue(
+												"medical_options",
+												customMedicalPayments,
+												"medical_coverage",
+											)
+										}
+									>
+										<Check size={14} />
+									</Button>
+								</div>
 							)}
 
 							{/* Property Damage */}
@@ -519,7 +674,14 @@ export const AlternativeOptionsForm = () => {
 									render={({ field, fieldState }) => (
 										<Select
 											value={optionPropertyDamages[currentIndex]}
-											onValueChange={field.onChange}
+											onValueChange={(value: string) => {
+												if (value === "customPropertyDamage") {
+													setShowCustomPropertyDamage(true);
+												} else {
+													setShowCustomPropertyDamage(false);
+													field.onChange(value);
+												}
+											}}
 										>
 											<SelectTrigger className="ring-slate-300 border-none ring-1 rounded-[8px] w-full flex items-center justify-between text-sm px-4 py-2">
 												{optionPropertyDamages[currentIndex] ||
@@ -529,15 +691,24 @@ export const AlternativeOptionsForm = () => {
 												side="bottom"
 												className="w-[736px] mt-1 ring-1 ring-slate-200 bg-slate-100 border-none rounded-[8px]"
 											>
-												{propertyDamageConstant.map((propertyDamage) => (
+												{propertyDamageOptions?.map((propertyDamage) => (
 													<SelectItem
-														value={propertyDamage}
-														key={propertyDamage}
+														value={propertyDamage.property_coverage}
+														key={propertyDamage.id}
 														className="hover:text-slate-900 text-slate-500"
 													>
-														{propertyDamage}
+														{propertyDamage.property_coverage}
 													</SelectItem>
 												))}
+												<SelectItem
+													value="customPropertyDamage"
+													className="hover:text-slate-900 text-slate-500 border-t border-slate-200"
+												>
+													<div className="flex items-center gap-2">
+														<Plus size={14} />
+														Custom Property Damage
+													</div>
+												</SelectItem>
 											</SelectContent>
 											{fieldState.error && (
 												<p className="text-red-500 text-sm mt-1">
@@ -547,6 +718,30 @@ export const AlternativeOptionsForm = () => {
 										</Select>
 									)}
 								/>
+							)}
+							{showCustomPropertyDamage && (
+								<div className="flex items-center gap-2">
+									<Input
+										id="custom_property_damage"
+										onChange={(e) => setCustomPropertyDamage(e.target.value)}
+										placeholder="Custom Property Damage"
+										className="ring-1 ring-slate-300 rounded-[8px] border-none"
+									/>
+									<Button
+										type="button"
+										variant="default"
+										disabled={!customPropertyDamage || isLoading}
+										onClick={() =>
+											handleInsertNewCustomValue(
+												"property_options",
+												customPropertyDamage,
+												"property_coverage",
+											)
+										}
+									>
+										<Check size={14} />
+									</Button>
+								</div>
 							)}
 
 							{/* Rental Car Coverage */}

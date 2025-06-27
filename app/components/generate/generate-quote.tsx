@@ -18,7 +18,7 @@ import { VehicleForm } from "./vehicle-form";
 export default function GenerateQuote() {
 	const translation = useContext(LanguageContext);
 
-	const form = useForm<FormSchema>({
+	const form = useForm({
 		resolver: zodResolver(formSchema),
 	});
 
